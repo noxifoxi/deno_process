@@ -19,8 +19,10 @@ export interface KillOptions {
  * Requires `--allow-run` flag
  * @param pid
  */
-export async function get(pid: number): Promise<Process | void> {
-  return (await getAll()).find((v) => v.pid === pid);
+export async function get(pidOrName: number | string): Promise<Process | void> {
+  if (typeof pidOrName === 'number')
+    return (await getAll()).find((v) => v.pid === pidOrName);
+  return (await getAll()).find((v) => v.command === pidOrName);
 }
 
 /**
