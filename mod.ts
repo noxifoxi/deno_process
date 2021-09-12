@@ -1,4 +1,4 @@
-const { build, run, readAll } = Deno;
+import { readAll } from 'https://deno.land/std/io/util.ts';
 
 export interface Proc {
 	command: string; // Command to run this process
@@ -31,11 +31,11 @@ export class Process {
 	 * Requires `--allow-run` flag
 	 */
 	static async getAll(): Promise<Proc[]> {
-		const commands = build.os == "windows"
+		const commands = Deno.build.os == "windows"
 			? ["wmic.exe", "PROCESS", "GET", "Name,ProcessId,ParentProcessId,Status"]
 			: ["ps", "-A", "-o", "comm,ppid,pid,stat"];
 
-		const ps = run({
+		const ps = Deno.run({
 			cmd: commands,
 			stdout: "piped",
 		});
@@ -97,7 +97,7 @@ export class Process {
 		options: KillOptions = {},
 	): string[] {
 		const killByName = typeof pidOrName === "string";
-		if (build.os === "windows") {
+		if (Deno.build.os === "windows") {
 			const commands = ["taskkill"];
 	
 			if (options.force) {
@@ -111,7 +111,7 @@ export class Process {
 			commands.push(killByName ? "/im" : "/pid", pidOrName + "");
 	
 			return commands;
-		} else if (build.os === "linux") {
+		} else if (Deno.build.os === "linux") {
 			const commands = [killByName ? "killall" : "kill"];
 	
 			if (options.force) {
@@ -154,7 +154,7 @@ export class Process {
 	): Promise<void> {
 		const commands = Process.getKillCommand(pidOrName, options);
 
-		const ps = run({
+		const ps = Deno.run({
 			cmd: commands,
 			stderr: "piped",
 		});
